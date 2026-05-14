@@ -14,6 +14,12 @@ Servo frontRight;
 Servo backLeft;
 Servo backRight;
 
+void writeServoForMs(Servo &servo, int pulse, int durationMs) {
+  servo.writeMicroseconds(pulse);
+  delay(durationMs);
+  servo.writeMicroseconds(STOP_US);
+}
+
 void writeDrive(int leftPulse, int rightPulse) {
   frontLeft.writeMicroseconds(leftPulse);
   backLeft.writeMicroseconds(leftPulse);
@@ -37,8 +43,26 @@ void turnRight() {
   writeDrive(FORWARD_US, REVERSE_US);
 }
 
+void testOneServo(const char *label, Servo &servo) {
+  Serial.print("Testing ");
+  Serial.println(label);
+  writeServoForMs(servo, FORWARD_US, 800);
+  delay(300);
+}
+
+void testServos() {
+  stopDrive();
+  testOneServo("front left", frontLeft);
+  testOneServo("front right", frontRight);
+  testOneServo("back left", backLeft);
+  testOneServo("back right", backRight);
+  stopDrive();
+  Serial.println("Test complete");
+}
+
 void handleCommand(String command) {
   command.trim();
+  command.toUpperCase();
 
   if (command == "FORWARD") {
     driveForward();
@@ -46,6 +70,16 @@ void handleCommand(String command) {
     turnLeft();
   } else if (command == "RIGHT") {
     turnRight();
+  } else if (command == "FL") {
+    writeServoForMs(frontLeft, FORWARD_US, 1000);
+  } else if (command == "FR") {
+    writeServoForMs(frontRight, FORWARD_US, 1000);
+  } else if (command == "BL") {
+    writeServoForMs(backLeft, FORWARD_US, 1000);
+  } else if (command == "BR") {
+    writeServoForMs(backRight, FORWARD_US, 1000);
+  } else if (command == "TEST") {
+    testServos();
   } else {
     stopDrive();
   }
